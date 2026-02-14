@@ -1,0 +1,29 @@
+cff-version: 1.1.0
+message: "If you use this workflow in your research, please cite the associated study."
+title: "Revealing Risk Through Cascade Path Dynamics in Compounding Dry Hazards: Computational Workflow"
+version: 1.0.0
+authors:
+  - family-names: Abella
+    given-names: Davy
+    affiliation: Kongju National University
+  - family-names: Ahn
+    given-names: Kuk-Hyun
+    affiliation: Kongju National University
+repository-code: 
+keywords:
+  - compound dry hazards
+  - heatwaves
+  - drought
+  - fire
+  - cascade pathways
+  - ERA5
+  - climate risk
+references:
+  - type: article-journal
+    title: "Revealing Risk Through Cascade Path Dynamics in Compounding Dry Hazards"
+    authors:
+      - family-names: Abella
+        given-names: Davy
+      - family-names: Ahn
+        given-names: Kuk-Hyun
+    year: 2026
