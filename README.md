@@ -8,7 +8,7 @@ Abella, D. & Ahn, KH (2026)
 
 ## Purpose
 
-This repository provides **methodological transparency** for our analysis of compound dry hazards (heatwaves, droughts, and fire) and their cascade pathways. All code used to generate results in the manuscript is included "as-run" to enable:
+This repository provides **methodological transparency** for our analysis of compound dry hazards (heatwaves, droughts, and fire) and their cascade pathways. Code is presented as **pseudocode** for:
 
 1. Data pre-processing of the data used from ERA5  
 2. Thresholds for hazard detection
