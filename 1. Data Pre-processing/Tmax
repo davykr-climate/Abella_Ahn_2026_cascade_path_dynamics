@@ -1,0 +1,99 @@
+"""
+ERA5 Daily Maximum Temperature Processor
+
+Core functions to convert ERA5 hourly temperature (Kelvin) to daily maximum (Celsius).
+Caller handles file paths, date ranges, and I/O operations.
+"""
+
+import xarray as xr
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Union
+
+
+def compute_daily_max_temperature(
+    file_path: Union[str, Path],
+    date_label: str,
+    kelvin_offset: float = 273.15
+) -> xr.Dataset:
+    """
+    Compute daily maximum 2m temperature from ERA5 hourly file.
+    
+    Parameters
+    ----------
+    file_path : str or Path
+        Path to NetCDF file containing 't2m' variable in Kelvin
+    date_label : str
+        Date identifier (e.g., '20200115') for output dimension
+    kelvin_offset : float
+        Kelvin to Celsius conversion offset (default: 273.15)
+    
+    Returns
+    -------
+    xr.Dataset
+        Dataset with daily maximum temperature in Celsius
+    """
+    ds = xr.open_dataset(file_path)
+    
+    # Convert to Celsius and compute daily max
+    temp_c = ds['t2m'] - kelvin_offset
+    
+    # Auto-detect time dimension (ERA5 uses 'valid_time' or 'time')
+    time_dim = 'valid_time' if 'valid_time' in ds.dims else 'time'
+    daily_max = temp_c.max(dim=time_dim).expand_dims(date=[date_label])
+    
+    # Package result
+    result = daily_max.to_dataset(name='t2m')
+    result['t2m'].attrs['units'] = '°C'
+    return result
+
+
+def process_date_range(
+    base_directory: Union[str, Path],
+    start_date: datetime,
+    end_date: datetime,
+    kelvin_offset: float = 273.15
+) -> xr.Dataset:
+    """
+    Process consecutive days to compute daily maximum temperatures.
+    
+    Parameters
+    ----------
+    base_directory : str or Path
+        Base path containing yearly subdirectories (e.g., '.../1980/')
+    start_date : datetime
+        First date to process (inclusive)
+    end_date : datetime
+        Last date to process (exclusive)
+    kelvin_offset : float
+        Kelvin to Celsius conversion offset
+    
+    Returns
+    -------
+    xr.Dataset
+        Concatenated daily maximum temperatures for date range
+    """
+    base_dir = Path(base_directory)
+    date_range = [
+        start_date + timedelta(days=i)
+        for i in range((end_date - start_date).days)
+    ]
+    
+    # Process each day
+    daily_datasets = [
+        compute_daily_max_temperature(
+            file_path=base_dir / str(dt.year) / f"ERA5_T_{dt.strftime('%Y%m%d')}.nc",
+            date_label=dt.strftime('%Y%m%d'),
+            kelvin_offset=kelvin_offset
+        )
+        for dt in date_range
+    ]
+    
+    # Combine results
+    combined = xr.concat(daily_datasets, dim='date')
+    combined.attrs.update({
+        'processing': 'Daily maximum 2m temperature',
+        'source': 'ERA5 Reanalysis',
+        'conversion': 'Kelvin to Celsius'
+    })
+    return combined
